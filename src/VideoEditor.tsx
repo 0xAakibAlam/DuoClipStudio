@@ -1,14 +1,9 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { DndContext } from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
 import { DraggableTrackBar } from './components/DraggableTrackBar';
-import { useVideoEditor } from './context/VideoEditorContext';
-
-interface Track {
-    file: File | null;
-    url: string | null;
-    start: number;
-    duration: number;
-}
+import { useVideoEditor } from './context/VideoEditorHook';
+import type { Track } from './context/VideoEditorTypes';
 
 export function VideoEditor() {
     const { state, dispatch } = useVideoEditor();
@@ -119,6 +114,7 @@ export function VideoEditor() {
         };
 
         const handleEnded = () => {
+            console.log(isTrackBAvailable, isTrackAAvailable, isPlaying);
             if (isTrackBAvailable) {
                 dispatch({ type: 'SET_IS_PLAYING', payload: true });
                 dispatch({ type: 'SET_ACTIVE_TRACK', payload: 'B' });
@@ -203,11 +199,12 @@ export function VideoEditor() {
                 videoRefA.current.currentTime = Math.max(0, videoTime);
             }
         } else {
+            dispatch({ type: 'SET_IS_PLAYING', payload: false });
             dispatch({ type: 'SET_ACTIVE_TRACK', payload: null });
         }
     };
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, delta } = event;
         if (!active) return;
         const secondsDelta = delta.x / TIMELINE_SCALE;
